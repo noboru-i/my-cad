@@ -5,7 +5,7 @@ wall_width = 100;
 wall_height = 50;
 wall_thin = 4;
 
-wall_distance_array = [30, 20, 18, 18, 18];
+wall_distance_array = [16, 18, 34, 20, 14, 14];
 
 extra_space = 10;
 
@@ -24,7 +24,7 @@ module model () {
     list = [ for (a = [0 : len(wall_distance_array)]) if (a < i) wall_distance_array[a]];
     translate([0, sum(list), -2])
       rotate([90, 0, 0])
-        hex_panel([wall_width, wall_height, wall_thin], 2, 10, frame = 2, anchor = [0,-1,0]);
+        hex_panel([wall_width, wall_height, wall_thin], 2, 8, frame = 2, anchor = [0,-1,0]);
   }
 
   difference() {

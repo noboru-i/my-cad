@@ -1,9 +1,9 @@
 // bottom radius [mm]
-r1 = 24; // [10:0.1:180]
+r1 = 12; // [10:0.1:180]
 // top radius [mm]
 r2 = 2; // [0:0.1:2]
 // cylinder height [mm]
-height = 40; // [10:0.1:180]
+height = 30; // [10:0.1:180]
 
 // stand height [mm]
 stand_height = 4; // [0.5:0.1:5]
@@ -11,7 +11,7 @@ stand_height = 4; // [0.5:0.1:5]
 module model()
 {
     cylinder(h = height, r1 = r1, r2 = r2, center = false);
-    translate([0, 48, 0])
+    translate([0, r1*2, 0])
         cylinder(h = height, r1 = r1, r2 = r2, center = false);
 
     translate([-r1, 0, -stand_height])

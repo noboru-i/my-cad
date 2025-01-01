@@ -5,7 +5,7 @@ r2 = 2; // [0:0.1:2]
 // cylinder height [mm]
 height = 30; // [10:0.1:180]
 
-// stand height [mm]
+// base height [mm]
 stand_height = 4; // [0.5:0.1:5]
 
 module model()

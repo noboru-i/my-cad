@@ -5,18 +5,14 @@ wall_width = 100;
 wall_height = 50;
 wall_thin = 4;
 
-wall_distance_array = [18, 18, 18, 14, 14];
+wall_distance_array = [18, 18, 18, 18, 18];
 
-extra_space = 10;
+extra_space = 14;
 
 base_height = 12;
 
 hole_radius = 5.5;
 hole_height = 2;
-
-panel_hex_wall = 1.5;
-panel_hex_spacing = 8;
-panel_frame = 6;
 
 //Sum the elements of a list.
 function SubSum(x=0,Index=0)=x[Index]+((Index<=0)?0:SubSum(x=x,Index=Index-1));
@@ -26,9 +22,8 @@ module model () {
   wall_distance_sum = Sum(wall_distance_array);
   for (i = [0 : len(wall_distance_array)]) {
     list = [ for (a = [0 : len(wall_distance_array)]) if (a < i) wall_distance_array[a]];
-    translate([0, sum(list), -panel_frame])
-      rotate([90, 0, 0])
-        hex_panel([wall_width, wall_height, wall_thin], panel_hex_wall, panel_hex_spacing, frame = panel_frame, anchor = [0,-1,0]);
+    translate([-wall_width/2, sum(list), 0])
+      cube([wall_width, wall_thin, wall_height]);
   }
 
   difference() {

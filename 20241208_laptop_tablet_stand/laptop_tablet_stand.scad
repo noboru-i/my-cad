@@ -11,7 +11,7 @@ extra_space = 14;
 
 base_height = 12;
 
-hole_radius = 5.5;
+hole_radius = 6;
 hole_height = 2;
 
 //Sum the elements of a list.

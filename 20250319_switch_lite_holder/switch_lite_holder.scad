@@ -3,7 +3,7 @@ base_height = 6.5;
 module hole() {
     rotate([0, 90, 0])
         translate([0, 0, 0.5])
-            cylinder(h = 6, r=4.5);
+            cylinder(h = 5, r=4.5);
     rotate([0, 90, 0])
         cylinder(h = 0.5, r=2.5);
 }
@@ -17,7 +17,7 @@ module model()
 
     // wall
     difference() {
-        cube([6.5, 150, 60]);
+        cube([5.5, 150, 60]);
         translate([0, 10, 50])
             hole();
         translate([0, 150 - 10, 50])

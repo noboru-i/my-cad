@@ -1,19 +1,14 @@
-// 穴: 直径25mm
+// Hole radius
 hole_r = 12.5;
-// 外側: 直径80mm
+// Outer radius
 outer_r = 40;
-// 厚さ: 2mm
+// Thickness
 thickness = 2;
-// 高さ: 10mm
+// Height
 height = 10;
 
 
 module model()
-{
-    film();
-}
-
-module film()
 {
     difference() {
         cylinder(h = height, r1 = outer_r, r2 = hole_r + thickness, center = true);

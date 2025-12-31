@@ -40,13 +40,13 @@ module model()
 
     // hook
     translate([33-base_height, 0, 0])
-        cuboid([base_height, 50, 16],
+        cuboid([base_height, 50, 36],
             rounding=2,
             edges=[TOP+FRONT, TOP+LEFT, TOP+BACK, FRONT+LEFT, BACK+LEFT],
             $fn=round_parameter,
             anchor=FRONT+LEFT+BOT);
     translate([33-base_height, 90, 0])
-        cuboid([base_height, 50, 16],
+        cuboid([base_height, 50, 36],
             rounding=2,
             edges=[TOP+FRONT, TOP+LEFT, TOP+BACK, FRONT+LEFT, BACK+LEFT],
             $fn=round_parameter,

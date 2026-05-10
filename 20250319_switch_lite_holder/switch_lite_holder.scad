@@ -9,7 +9,7 @@ round_parameter=4;
 module hole() {
     rotate([0, 90, 0])
         translate([0, 0, 0.5])
-            cylinder(h = 5, r=5.25, $fn=8);
+            cylinder(h = 5, r=6, $fn=8);
     rotate([0, 90, 0])
         cylinder(h = 0.5, r=2.5, $fn=8);
 }

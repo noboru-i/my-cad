@@ -1,15 +1,14 @@
 include <BOSL2/std.scad>
 
 // PLA keyboard + trackpad tray inspired by Crispy Backboard PRO.
-// Designed as A1 mini friendly split parts: every printable part is under 180 x 180 x 180 mm.
+// Designed as A1 mini friendly screwless split parts: every printable part is under 180 x 180 x 180 mm.
 // Source dimensions checked from Apple Store tech specs, 2026-06-22:
 // - Magic Keyboard (USB-C): 278.9 x 114.9 x 4.1-10.9 mm
 // - Magic Trackpad (USB-C): 160.0 x 114.9 x 4.9-10.9 mm
 // Render one part at a time with:
 //   openscad -D 'part="back_left"' -o stl/back_left.stl keyboard_trackpad_tray.scad
 
-part = "full"; // full, back_left, back_right, front_left, front_right,
-               // connector_x_back, connector_x_front, connector_y_left, connector_y_right
+part = "full"; // full, back_left, back_right, front_left, front_right
 
 keyboard_width = 278.9;
 keyboard_depth = 114.9;
@@ -44,15 +43,12 @@ rib_width = 5;
 rib_height = 3;
 rib_spacing = 32;
 
-m3_clearance_radius = 1.8;
-connector_plate_thickness = 3;
-connector_plate_rounding = 3;
-connector_x_size = [64, 20, connector_plate_thickness];
-connector_y_size = [20, 64, connector_plate_thickness];
-connector_hole_spacing = 36;
-
 split_gap = 0.35;
-max_part_xy = 178;
+join_tab_length = 22;
+join_tab_width = 18;
+join_tab_height = rib_height;
+join_clearance = 0.45;
+join_rounding = 1.5;
 
 $fn = 48;
 
@@ -66,11 +62,6 @@ module rounded_cube(size, r) {
         cylinder(h = z, r = r);
     }
   }
-}
-
-module through_hole(h = 30, r = m3_clearance_radius) {
-  translate([0, 0, -h / 2])
-    cylinder(h = h, r = r);
 }
 
 module keyboard_stops() {
@@ -136,21 +127,7 @@ module underside_ribs() {
   }
 }
 
-module connector_holes_in_tray() {
-  // Holes for two plates crossing the vertical split.
-  for (y = [-82, 82], x = [-connector_hole_spacing / 2, connector_hole_spacing / 2]) {
-    translate([x, y, base_thickness / 2])
-      through_hole();
-  }
-
-  // Holes for two plates crossing the horizontal split.
-  for (x = [-102, 102], y = [-connector_hole_spacing / 2, connector_hole_spacing / 2]) {
-    translate([x, y, base_thickness / 2])
-      through_hole();
-  }
-}
-
-module full_tray() {
+module base_tray() {
   difference() {
     union() {
       rounded_cube([tray_width, tray_depth, base_thickness], corner_radius);
@@ -161,67 +138,102 @@ module full_tray() {
     }
 
     trackpad_recess();
-    connector_holes_in_tray();
-
-    // Small clearance gaps on the split planes so separately printed parts assemble cleanly.
-    translate([0, 0, base_thickness / 2])
-      cube([split_gap, tray_depth + 2, 40], center = true);
-    translate([0, 0, base_thickness / 2])
-      cube([tray_width + 2, split_gap, 40], center = true);
   }
 }
 
-module quadrant(xside, yside) {
+module split_clearance() {
+  translate([0, 0, base_thickness / 2])
+    cube([split_gap, tray_depth + 2, 40], center = true);
+  translate([0, 0, base_thickness / 2])
+    cube([tray_width + 2, split_gap, 40], center = true);
+}
+
+module cropped_quadrant(xside, yside) {
   xcenter = xside * tray_width / 4;
   ycenter = yside * tray_depth / 4;
   intersection() {
-    full_tray();
+    difference() {
+      base_tray();
+      split_clearance();
+    }
     translate([xcenter, ycenter, 0])
       cube([tray_width / 2 + 2, tray_depth / 2 + 2, 60], center = true);
   }
 }
 
-module connector_x() {
-  difference() {
-    rounded_cube(connector_x_size, connector_plate_rounding);
-    for (x = [-connector_hole_spacing / 2, connector_hole_spacing / 2]) {
-      translate([x, 0, connector_plate_thickness / 2])
-        through_hole(h = 20);
-    }
+module x_join_tab(y) {
+  // Overlap slightly into the owning quadrant and into the tray underside so CGAL produces a manifold union.
+  translate([join_tab_length / 2 - split_gap / 2 - 1, y, -join_tab_height])
+    rounded_cube([join_tab_length, join_tab_width, join_tab_height + 0.25], join_rounding);
+}
+
+module y_join_tab(x) {
+  // Overlap slightly into the owning quadrant and into the tray underside so CGAL produces a manifold union.
+  translate([x, join_tab_length / 2 - split_gap / 2 - 1, -join_tab_height])
+    rounded_cube([join_tab_width, join_tab_length, join_tab_height + 0.25], join_rounding);
+}
+
+module x_join_socket(y) {
+  translate([join_tab_length / 2 - split_gap / 2 - 1, y, -join_tab_height - 0.1])
+    rounded_cube([join_tab_length + join_clearance, join_tab_width + join_clearance, join_tab_height + 0.6], join_rounding);
+}
+
+module y_join_socket(x) {
+  translate([x, join_tab_length / 2 - split_gap / 2 - 1, -join_tab_height - 0.1])
+    rounded_cube([join_tab_width + join_clearance, join_tab_length + join_clearance, join_tab_height + 0.6], join_rounding);
+}
+
+module integral_join_tabs(xside, yside) {
+  // Left-side quadrants carry tabs across the vertical split.
+  if (xside < 0) {
+    for (y = [yside * 42, yside * 82])
+      x_join_tab(y);
+  }
+
+  // Front quadrants carry tabs across the horizontal split.
+  if (yside < 0) {
+    for (x = [xside * 54, xside * 110])
+      y_join_tab(x);
   }
 }
 
-module connector_y() {
+module integral_join_sockets(xside, yside) {
+  // Right-side quadrants receive vertical-split tabs.
+  if (xside > 0) {
+    for (y = [yside * 42, yside * 82])
+      x_join_socket(y);
+  }
+
+  // Back quadrants receive horizontal-split tabs.
+  if (yside > 0) {
+    for (x = [xside * 54, xside * 110])
+      y_join_socket(x);
+  }
+}
+
+module printable_quadrant(xside, yside) {
   difference() {
-    rounded_cube(connector_y_size, connector_plate_rounding);
-    for (y = [-connector_hole_spacing / 2, connector_hole_spacing / 2]) {
-      translate([0, y, connector_plate_thickness / 2])
-        through_hole(h = 20);
+    union() {
+      cropped_quadrant(xside, yside);
+      integral_join_tabs(xside, yside);
     }
+    integral_join_sockets(xside, yside);
   }
 }
 
 module selected_part() {
   if (part == "full") {
-    full_tray();
+    base_tray();
   } else if (part == "back_left") {
-    quadrant(-1, 1);
+    printable_quadrant(-1, 1);
   } else if (part == "back_right") {
-    quadrant(1, 1);
+    printable_quadrant(1, 1);
   } else if (part == "front_left") {
-    quadrant(-1, -1);
+    printable_quadrant(-1, -1);
   } else if (part == "front_right") {
-    quadrant(1, -1);
-  } else if (part == "connector_x_back") {
-    connector_x();
-  } else if (part == "connector_x_front") {
-    connector_x();
-  } else if (part == "connector_y_left") {
-    connector_y();
-  } else if (part == "connector_y_right") {
-    connector_y();
+    printable_quadrant(1, -1);
   } else {
-    full_tray();
+    base_tray();
   }
 }
 

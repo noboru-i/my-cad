@@ -2,6 +2,7 @@ include <BOSL2/std.scad>
 
 // PLA keyboard + trackpad tray inspired by Crispy Backboard PRO.
 // Designed as A1 mini friendly screwless split parts: every printable part is under 180 x 180 x 180 mm.
+// The desk-facing underside is intentionally flat for reliable FDM printing.
 // Source dimensions checked from Apple Store tech specs, 2026-06-22:
 // - Magic Keyboard (USB-C): 278.9 x 114.9 x 4.1-10.9 mm
 // - Magic Trackpad (USB-C): 160.0 x 114.9 x 4.9-10.9 mm
@@ -39,14 +40,10 @@ wrist_rest_depth = 88;
 wrist_rest_height = 4;
 wrist_rest_rounding = 12;
 
-rib_width = 5;
-rib_height = 3;
-rib_spacing = 32;
-
 split_gap = 0.35;
 join_tab_length = 22;
 join_tab_width = 18;
-join_tab_height = rib_height;
+join_tab_height = base_thickness;
 join_clearance = 0.45;
 join_rounding = 1.5;
 
@@ -115,23 +112,10 @@ module wrist_rests() {
   }
 }
 
-module underside_ribs() {
-  for (x = [-112:rib_spacing:112]) {
-    translate([x, 0, -rib_height])
-      rounded_cube([rib_width, tray_depth - 24, rib_height], 1.8);
-  }
-
-  for (y = [-78:rib_spacing:78]) {
-    translate([0, y, -rib_height])
-      rounded_cube([tray_width - 24, rib_width, rib_height], 1.8);
-  }
-}
-
 module base_tray() {
   difference() {
     union() {
       rounded_cube([tray_width, tray_depth, base_thickness], corner_radius);
-      underside_ribs();
       keyboard_stops();
       trackpad_stops();
       wrist_rests();
@@ -162,25 +146,23 @@ module cropped_quadrant(xside, yside) {
 }
 
 module x_join_tab(y) {
-  // Overlap slightly into the owning quadrant and into the tray underside so CGAL produces a manifold union.
-  translate([join_tab_length / 2 - split_gap / 2 - 1, y, -join_tab_height])
-    rounded_cube([join_tab_length, join_tab_width, join_tab_height + 0.25], join_rounding);
+  translate([join_tab_length / 2 - split_gap / 2 - 1, y, 0])
+    rounded_cube([join_tab_length, join_tab_width, join_tab_height], join_rounding);
 }
 
 module y_join_tab(x) {
-  // Overlap slightly into the owning quadrant and into the tray underside so CGAL produces a manifold union.
-  translate([x, join_tab_length / 2 - split_gap / 2 - 1, -join_tab_height])
-    rounded_cube([join_tab_width, join_tab_length, join_tab_height + 0.25], join_rounding);
+  translate([x, join_tab_length / 2 - split_gap / 2 - 1, 0])
+    rounded_cube([join_tab_width, join_tab_length, join_tab_height], join_rounding);
 }
 
 module x_join_socket(y) {
-  translate([join_tab_length / 2 - split_gap / 2 - 1, y, -join_tab_height - 0.1])
-    rounded_cube([join_tab_length + join_clearance, join_tab_width + join_clearance, join_tab_height + 0.6], join_rounding);
+  translate([join_tab_length / 2 - split_gap / 2 - 1, y, -0.1])
+    rounded_cube([join_tab_length + join_clearance, join_tab_width + join_clearance, join_tab_height + 0.2], join_rounding);
 }
 
 module y_join_socket(x) {
-  translate([x, join_tab_length / 2 - split_gap / 2 - 1, -join_tab_height - 0.1])
-    rounded_cube([join_tab_width + join_clearance, join_tab_length + join_clearance, join_tab_height + 0.6], join_rounding);
+  translate([x, join_tab_length / 2 - split_gap / 2 - 1, -0.1])
+    rounded_cube([join_tab_width + join_clearance, join_tab_length + join_clearance, join_tab_height + 0.2], join_rounding);
 }
 
 module integral_join_tabs(xside, yside) {

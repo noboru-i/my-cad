@@ -51,6 +51,7 @@ join_tab_width = 18;
 join_tab_height = base_thickness;
 join_clearance = 0.45;
 join_rounding = 1.5;
+use_integral_join_tabs = false; // false keeps the desk-facing underside completely flat.
 
 $fn = 48;
 
@@ -122,20 +123,24 @@ module cable_reliefs() {
   trackpad_outer_d = trackpad_depth + fit_clearance * 2;
   keyboard_port_y = keyboard_y + keyboard_outer_d / 2;
   trackpad_port_y = trackpad_y + trackpad_outer_d / 2;
+  cable_relief_height = stop_height + 2;
+  cable_relief_z = base_thickness + cable_relief_height / 2;
 
-  // Rear/top exit from the centered Magic Keyboard charging port.
-  translate([0, (keyboard_port_y + tray_depth / 2) / 2, base_thickness + stop_height / 2])
-    cube([keyboard_cable_gap, tray_depth / 2 - keyboard_port_y + 4, base_thickness + stop_height + 2], center = true);
+  // Rear/top exit from the centered Magic Keyboard charging port.  This cut is
+  // above the base plate only; the desk-facing underside remains flat.
+  translate([0, (keyboard_port_y + tray_depth / 2) / 2, cable_relief_z])
+    cube([keyboard_cable_gap, tray_depth / 2 - keyboard_port_y + 4, cable_relief_height], center = true);
 
-  // Centered connector pocket immediately behind the Magic Trackpad port.
-  translate([0, trackpad_port_y + trackpad_connector_pocket_depth / 2 - 1, -1])
-    rounded_cube([trackpad_connector_pocket_width, trackpad_connector_pocket_depth, base_thickness + stop_height + 2], 2);
+  // Centered connector pocket immediately behind the Magic Trackpad port.  Cut
+  // from the top side only so it does not create an underside slot/rib pattern.
+  translate([0, trackpad_port_y + trackpad_connector_pocket_depth / 2 - 1, base_thickness - 0.1])
+    rounded_cube([trackpad_connector_pocket_width, trackpad_connector_pocket_depth, cable_relief_height + 0.2], 2);
 
   // Cable path from the Magic Trackpad port upward through the tray, offset to
   // the right so it does not remove the center split join tabs/sockets.
   route_start_y = trackpad_port_y + trackpad_connector_pocket_depth - 2;
-  translate([trackpad_cable_route_x, (route_start_y + tray_depth / 2) / 2, base_thickness + stop_height / 2])
-    cube([trackpad_cable_gap, tray_depth / 2 - route_start_y + 4, base_thickness + stop_height + 2], center = true);
+  translate([trackpad_cable_route_x, (route_start_y + tray_depth / 2) / 2, cable_relief_z])
+    cube([trackpad_cable_gap, tray_depth / 2 - route_start_y + 4, cable_relief_height], center = true);
 }
 
 module wrist_rests() {
@@ -234,9 +239,11 @@ module printable_quadrant(xside, yside) {
   difference() {
     union() {
       cropped_quadrant(xside, yside);
-      integral_join_tabs(xside, yside);
+      if (use_integral_join_tabs)
+        integral_join_tabs(xside, yside);
     }
-    integral_join_sockets(xside, yside);
+    if (use_integral_join_tabs)
+      integral_join_sockets(xside, yside);
   }
 }
 

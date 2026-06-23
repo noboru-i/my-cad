@@ -47,4 +47,6 @@ done
 - 推奨: 0.2mm layer, 3 walls, infill 15-25%
 - 反り防止のため、ベッド接地面をきれいにし、必要なら brim を使用
 - Trackpad ポケットは浅めの 1.0mm なので、実機のガタつきに応じて調整する
+- Magic Keyboard / Magic Trackpad ともに充電端子は背面中央にある前提で、上側へ抜けるケーブル用スリットと Trackpad 用コネクタ逃げを入れている
+- Trackpad 側のケーブル経路は中央の差し込みタブを避けるため少し右へ逃がしている。USB-C コネクタやケーブルが太い場合は `keyboard_cable_gap` / `trackpad_cable_gap` / `trackpad_connector_pocket_width` を大きくする
 - 差し込み部はプリンタの寸法精度に左右されるため、まず `join_clearance = 0.45` で試す

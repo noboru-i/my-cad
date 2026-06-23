@@ -32,7 +32,12 @@ front_lip_width = 4;
 
 trackpad_pocket_depth = 1.0;
 trackpad_corner_radius = 11;
-trackpad_cable_gap = 22;
+keyboard_cable_gap = 24;
+trackpad_cable_gap = 24;
+trackpad_cable_route_x = 30;
+trackpad_connector_pocket_width = 40;
+trackpad_connector_pocket_depth = 20;
+front_finger_gap = 18;
 trackpad_side_stop_length = 44;
 
 wrist_rest_width = 58;
@@ -65,8 +70,13 @@ module keyboard_stops() {
   outer_w = keyboard_width + fit_clearance * 2;
   outer_d = keyboard_depth + fit_clearance * 2;
 
-  translate([0, keyboard_y + outer_d / 2 + stop_width / 2, base_thickness])
-    rounded_cube([outer_w + stop_width * 2, stop_width, stop_height], 1.4);
+  // Magic Keyboard USB-C port is centered on the rear/top edge; leave a gap
+  // in the rear stop so a charging cable can exit toward the top of the tray.
+  rear_stop_w = (outer_w + stop_width * 2 - keyboard_cable_gap) / 2;
+  for (x = [-(keyboard_cable_gap / 2 + rear_stop_w / 2), keyboard_cable_gap / 2 + rear_stop_w / 2]) {
+    translate([x, keyboard_y + outer_d / 2 + stop_width / 2, base_thickness])
+      rounded_cube([rear_stop_w, stop_width, stop_height], 1.4);
+  }
 
   for (x = [-outer_w / 2 - stop_width / 2, outer_w / 2 + stop_width / 2]) {
     translate([x, keyboard_y, base_thickness])
@@ -84,9 +94,9 @@ module trackpad_recess() {
   translate([0, trackpad_y, base_thickness - trackpad_pocket_depth])
     rounded_cube([recess_w, recess_d, trackpad_pocket_depth + 0.3], trackpad_corner_radius);
 
-  // Front USB-C cable / finger access notch.
+  // Front finger access notch for lifting the trackpad out.
   translate([0, trackpad_y - recess_d / 2 - 2, base_thickness - trackpad_pocket_depth])
-    cube([trackpad_cable_gap, 12, trackpad_pocket_depth + 0.4], center = true);
+    cube([front_finger_gap, 12, trackpad_pocket_depth + 0.4], center = true);
 }
 
 module trackpad_stops() {
@@ -98,8 +108,34 @@ module trackpad_stops() {
       rounded_cube([stop_width, trackpad_side_stop_length, stop_height], 1.4);
   }
 
-  translate([0, trackpad_y + outer_d / 2 + stop_width / 2, base_thickness])
-    rounded_cube([outer_w * 0.70, stop_width, stop_height], 1.4);
+  // Magic Trackpad USB-C port is centered on the rear/top edge; split the rear
+  // stop so the connector can plug in while the trackpad remains installed.
+  rear_stop_w = (outer_w * 0.70 - trackpad_cable_gap) / 2;
+  for (x = [-(trackpad_cable_gap / 2 + rear_stop_w / 2), trackpad_cable_gap / 2 + rear_stop_w / 2]) {
+    translate([x, trackpad_y + outer_d / 2 + stop_width / 2, base_thickness])
+      rounded_cube([rear_stop_w, stop_width, stop_height], 1.4);
+  }
+}
+
+module cable_reliefs() {
+  keyboard_outer_d = keyboard_depth + fit_clearance * 2;
+  trackpad_outer_d = trackpad_depth + fit_clearance * 2;
+  keyboard_port_y = keyboard_y + keyboard_outer_d / 2;
+  trackpad_port_y = trackpad_y + trackpad_outer_d / 2;
+
+  // Rear/top exit from the centered Magic Keyboard charging port.
+  translate([0, (keyboard_port_y + tray_depth / 2) / 2, base_thickness + stop_height / 2])
+    cube([keyboard_cable_gap, tray_depth / 2 - keyboard_port_y + 4, base_thickness + stop_height + 2], center = true);
+
+  // Centered connector pocket immediately behind the Magic Trackpad port.
+  translate([0, trackpad_port_y + trackpad_connector_pocket_depth / 2 - 1, -1])
+    rounded_cube([trackpad_connector_pocket_width, trackpad_connector_pocket_depth, base_thickness + stop_height + 2], 2);
+
+  // Cable path from the Magic Trackpad port upward through the tray, offset to
+  // the right so it does not remove the center split join tabs/sockets.
+  route_start_y = trackpad_port_y + trackpad_connector_pocket_depth - 2;
+  translate([trackpad_cable_route_x, (route_start_y + tray_depth / 2) / 2, base_thickness + stop_height / 2])
+    cube([trackpad_cable_gap, tray_depth / 2 - route_start_y + 4, base_thickness + stop_height + 2], center = true);
 }
 
 module wrist_rests() {
@@ -122,6 +158,7 @@ module base_tray() {
     }
 
     trackpad_recess();
+    cable_reliefs();
   }
 }
 

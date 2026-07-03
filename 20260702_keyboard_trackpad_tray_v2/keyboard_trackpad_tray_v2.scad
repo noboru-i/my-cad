@@ -50,6 +50,10 @@ arch_h = 6.5;
 pad_xs = [-130, -45, 45, 130];
 pad_w = 14;
 
+label_d = 0.6;                // engraving depth of the piece codes
+label_size = 5;
+label_font = "Liberation Sans:style=Bold";
+
 wrist_ledge = h1 + 1.9;       // 11.9, wrist plate rests here
 wrist_top = wrist_ledge + rib_t; // 14.9, flush with trackpad front
 plate_x0 = 86;
@@ -252,20 +256,60 @@ module piece_2d(name) {
   else if (name == "wrist_l") mirror([1, 0]) wrist_plate_2d();
 }
 
+// ---- engraved piece codes (see README): same letter mates, 1=front, 2=rear ----
+
+label_specs = [
+  // name, code, u, v, size, engrave bottom face
+  ["outer_front", "A1", -77.5, 6, label_size, false],
+  ["outer_rear", "A2", 30, 6, label_size, false],
+  ["stop_front", "B1", -77.5, 6, label_size, false],
+  ["stop_rear", "B2", 30, 6, label_size, false],
+  ["center_front", "C1", -77.5, 5.2, label_size, false],
+  ["center_rear", "C2", 30, 5.2, label_size, false],
+  ["stub", "S", -77.5, 5.2, label_size, false],
+  ["front_rail_l", "R1L", -70, 6, label_size, false],
+  ["front_rail_r", "R1R", 64, 6, label_size, false],
+  ["tpmid_rail_l", "R2L", -70, 5.2, label_size, false],
+  ["tpmid_rail_r", "R2R", 64, 5.2, label_size, false],
+  ["mid_rail_l", "R3L", -70, 5.2, label_size, false],
+  ["mid_rail_r", "R3R", 64, 5.2, label_size, false],
+  ["rear_rail_l", "R4L", -70, 5.2, label_size, false],
+  ["rear_rail_r", "R4R", 64, 5.2, label_size, false],
+  ["wrist_r", "WR", 115.5, -68.25, 8, true], // bottom: top face stays clean
+  ["wrist_l", "WL", -115.5, -68.25, 8, true],
+];
+
+function label_spec(name) = [for (s = label_specs) if (s[0] == name) s][0];
+
+module piece_3d(name) {
+  spec = label_spec(name);
+  difference() {
+    linear_extrude(rib_t) piece_2d(name);
+    if (spec[5]) {
+      translate([spec[2], spec[3], -0.1])
+        linear_extrude(label_d + 0.1)
+          mirror([1, 0])
+            text(spec[1], size = spec[4], font = label_font, halign = "center", valign = "center");
+    } else {
+      translate([spec[2], spec[3], rib_t - label_d])
+        linear_extrude(label_d + 0.1)
+          text(spec[1], size = spec[4], font = label_font, halign = "center", valign = "center");
+    }
+  }
+}
+
 // ---- assembly ----
 
 module place_y_rib(x) {
   translate([x - rib_t / 2, 0, 0])
     rotate([90, 0, 90])
-      linear_extrude(rib_t)
-        children();
+      children();
 }
 
 module place_x_rail(y) {
   translate([0, y + rib_t / 2, 0])
     rotate([90, 0, 0])
-      linear_extrude(rib_t)
-        children();
+      children();
 }
 
 module device_wedge(w, d, front_h, rear_h) {
@@ -277,32 +321,31 @@ module device_wedge(w, d, front_h, rear_h) {
 
 module assembly() {
   for (x = [rib_xs[0], rib_xs[4]]) {
-    place_y_rib(x) piece_2d("outer_front");
-    place_y_rib(x) piece_2d("outer_rear");
+    place_y_rib(x) piece_3d("outer_front");
+    place_y_rib(x) piece_3d("outer_rear");
   }
   for (x = [rib_xs[1], rib_xs[3]]) {
-    place_y_rib(x) piece_2d("stop_front");
-    place_y_rib(x) piece_2d("stop_rear");
+    place_y_rib(x) piece_3d("stop_front");
+    place_y_rib(x) piece_3d("stop_rear");
   }
-  place_y_rib(0) piece_2d("center_front");
-  place_y_rib(0) piece_2d("center_rear");
+  place_y_rib(0) piece_3d("center_front");
+  place_y_rib(0) piece_3d("center_rear");
   for (x = stub_xs)
-    place_y_rib(x) piece_2d("stub");
+    place_y_rib(x) piece_3d("stub");
 
-  place_x_rail(rail_ys[0]) piece_2d("front_rail_l");
-  place_x_rail(rail_ys[0]) piece_2d("front_rail_r");
-  place_x_rail(rail_ys[1]) piece_2d("tpmid_rail_l");
-  place_x_rail(rail_ys[1]) piece_2d("tpmid_rail_r");
-  place_x_rail(rail_ys[2]) piece_2d("mid_rail_l");
-  place_x_rail(rail_ys[2]) piece_2d("mid_rail_r");
-  place_x_rail(rail_ys[3]) piece_2d("rear_rail_l");
-  place_x_rail(rail_ys[3]) piece_2d("rear_rail_r");
+  place_x_rail(rail_ys[0]) piece_3d("front_rail_l");
+  place_x_rail(rail_ys[0]) piece_3d("front_rail_r");
+  place_x_rail(rail_ys[1]) piece_3d("tpmid_rail_l");
+  place_x_rail(rail_ys[1]) piece_3d("tpmid_rail_r");
+  place_x_rail(rail_ys[2]) piece_3d("mid_rail_l");
+  place_x_rail(rail_ys[2]) piece_3d("mid_rail_r");
+  place_x_rail(rail_ys[3]) piece_3d("rear_rail_l");
+  place_x_rail(rail_ys[3]) piece_3d("rear_rail_r");
 
-  translate([0, 0, wrist_ledge])
-    linear_extrude(rib_t) {
-      piece_2d("wrist_r");
-      piece_2d("wrist_l");
-    }
+  translate([0, 0, wrist_ledge]) {
+    piece_3d("wrist_r");
+    piece_3d("wrist_l");
+  }
 
   %devices();
 }
@@ -316,32 +359,47 @@ module devices() {
 
 // ---- print plates (A1 mini 180 x 180, 1.5 mm spacing) ----
 
-module plate1_2d() {
-  translate([-26.5, -84.5]) rotate(90) piece_2d("wrist_r");
-  translate([56, 146.5]) rotate(90) piece_2d("wrist_l");
-  translate([147, 62]) piece_2d("front_rail_l");
-  translate([-13.6, 76.5]) piece_2d("front_rail_r");
-  translate([147, 90.6]) piece_2d("tpmid_rail_l");
-  translate([-13.6, 103.6]) piece_2d("tpmid_rail_r");
-  translate([147, 116.6]) piece_2d("mid_rail_l");
-  translate([26.4, 127.7]) piece_2d("mid_rail_r");
-  translate([147, 139.2]) piece_2d("rear_rail_l");
-  translate([26.4, 150.7]) piece_2d("rear_rail_r");
-  translate([109.5, 161.8]) piece_2d("stub");
-  translate([189, 161.8]) piece_2d("stub");
+plate1_layout = [
+  // name, x, y, rotation
+  ["wrist_r", -26.5, -84.5, 90],
+  ["wrist_l", 56, 146.5, 90],
+  ["front_rail_l", 147, 62, 0],
+  ["front_rail_r", -13.6, 76.5, 0],
+  ["tpmid_rail_l", 147, 90.6, 0],
+  ["tpmid_rail_r", -13.6, 103.6, 0],
+  ["mid_rail_l", 147, 116.6, 0],
+  ["mid_rail_r", 26.4, 127.7, 0],
+  ["rear_rail_l", 147, 139.2, 0],
+  ["rear_rail_r", 26.4, 150.7, 0],
+  ["stub", 109.5, 161.8, 0],
+  ["stub", 189, 161.8, 0],
+];
+
+plate2_layout = [
+  ["outer_rear", 36.4, 1.1, 0],
+  ["outer_rear", 36.4, 29.2, 0],
+  ["stop_rear", 36.4, 57.3, 0],
+  ["stop_rear", 36.4, 85.4, 0],
+  ["center_rear", 36.4, 113.5, 0],
+  ["outer_front", 109.5, 137.6, 0],
+  ["outer_front", 190, 137.6, 0],
+  ["stop_front", 109.5, 153.9, 0],
+  ["stop_front", 190, 153.9, 0],
+  ["center_front", 156.5, 109.5, 90],
+];
+
+module plate_2d(layout) {
+  for (p = layout)
+    translate([p[1], p[2]])
+      rotate(p[3])
+        piece_2d(p[0]);
 }
 
-module plate2_2d() {
-  translate([36.4, 1.1]) piece_2d("outer_rear");
-  translate([36.4, 29.2]) piece_2d("outer_rear");
-  translate([36.4, 57.3]) piece_2d("stop_rear");
-  translate([36.4, 85.4]) piece_2d("stop_rear");
-  translate([36.4, 113.5]) piece_2d("center_rear");
-  translate([109.5, 137.6]) piece_2d("outer_front");
-  translate([190, 137.6]) piece_2d("outer_front");
-  translate([109.5, 153.9]) piece_2d("stop_front");
-  translate([190, 153.9]) piece_2d("stop_front");
-  translate([156.5, 109.5]) rotate(90) piece_2d("center_front");
+module plate_3d(layout) {
+  for (p = layout)
+    translate([p[1], p[2], 0])
+      rotate(p[3])
+        piece_3d(p[0]);
 }
 
 // ---- sanity checks ----
@@ -357,7 +415,7 @@ assert(tp_half <= rib_xs[3] - rib_t / 2 + 0.01, "stop ribs narrower than trackpa
 // empty renders confirm plates fit 178 x 178 and nothing touches the devices
 module check_plate_overflow(plate) {
   intersection() {
-    if (plate == 1) plate1_2d(); else plate2_2d();
+    plate_2d(plate == 1 ? plate1_layout : plate2_layout);
     difference() {
       square([1000, 1000], center = true);
       square([178, 178]);
@@ -378,11 +436,11 @@ module model() {
       devices();
     }
   } else if (part == "plate1") {
-    linear_extrude(rib_t) plate1_2d();
+    plate_3d(plate1_layout);
   } else if (part == "plate2") {
-    linear_extrude(rib_t) plate2_2d();
+    plate_3d(plate2_layout);
   } else {
-    linear_extrude(rib_t) piece_2d(part);
+    piece_3d(part);
   }
 }
 

@@ -35,7 +35,7 @@ rib_y0 = -108;
 rib_y1 = 108;
 rail_x0 = -145.5;
 rail_x1 = 145.5;
-rail_ys = [-106.5, -45, 55, 106]; // front, tpmid, mid, rear
+rail_ys = [-106.5, -45, 55, 104]; // front, tpmid, mid, rear
 rib_xs = [-141.75, -83.1, 0, 83.1, 141.75];
 stub_xs = [-45, 45];
 stub_y1 = -30;
@@ -61,6 +61,7 @@ tenon_len = 12;
 
 kb_half = keyboard_width / 2 + fit_clearance;
 tp_half = trackpad_width / 2 + fit_clearance;
+lip_half = rib_xs[3] + (rib_t + slot_clearance) / 2; // lip/trim edges land on the stop-rib slot edge
 kb_front = keyboard_y - keyboard_depth / 2 - fit_clearance;
 kb_rear = keyboard_y + keyboard_depth / 2 + fit_clearance;
 tp_rear = trackpad_y + trackpad_depth / 2 + fit_clearance;
@@ -96,7 +97,7 @@ module desk_pads() {
 }
 
 module dovetail() {
-  polygon([[-0.1, 2.5], [6, 1], [6, 9], [-0.1, 7.5]]);
+  polygon([[-0.1, 3.4], [6, 2.4], [6, 7.8], [-0.1, 6.8]]); // keeps >=1.8 mm socket walls on h1 members
 }
 
 // keep u < us, grow a dovetail tab past the joint line
@@ -178,7 +179,7 @@ module front_rail_profile() {
   difference() {
     union() {
       top_band(rail_x0, rail_x1, wrist_ledge);
-      top_band(-tp_half, tp_half, h1 + lip_h); // trackpad front lip
+      top_band(-lip_half, lip_half, h1 + lip_h); // trackpad front lip
       desk_pads();
     }
     for (x = concat(rib_xs, stub_xs))
@@ -189,7 +190,7 @@ module front_rail_profile() {
 module tpmid_rail_profile() {
   difference() {
     top_band(rail_x0, rail_x1, wrist_ledge); // h1 support in the middle is lower
-    top_band(-tp_half, tp_half, wrist_ledge + 1, h1); // trim center down to h1
+    top_band(-lip_half, lip_half, wrist_ledge + 1, h1); // trim center down to h1
     for (x = concat(rib_xs, stub_xs))
       top_slot(x);
   }

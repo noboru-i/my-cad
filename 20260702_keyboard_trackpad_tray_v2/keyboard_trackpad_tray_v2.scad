@@ -61,8 +61,10 @@ splice_a_y = 40;              // outer rib splice, clamped by deck tenon holes
 splice_b_y = rail_ys[1];      // stop rib splice lives inside the R2 slot
 splice_r1_x = rib_xs[3];      // front rail splices inside the stop rib slots
 dt_len = 9;
-dt_a = [[-0.1, float_gap], [dt_len, float_gap], [dt_len, h_sub], [-0.1, h_sub - 1.5]];
-dt_b = [[-0.1, 4], [dt_len, 4], [dt_len, h_sub], [-0.1, h_sub - 1.2]];
+// dovetail tops stay >= 1.2 under h_sub: the socket hook must keep meat, or it
+// tapers to a point and slices as a loose sliver (v3 first print)
+dt_a = [[-0.1, 0], [dt_len, 0], [dt_len, h_sub - 2], [-0.1, h_sub - 3.5]];
+dt_b = [[-0.1, 4], [dt_len, 4], [dt_len, h_sub - 1.4], [-0.1, h_sub - 2.4]];
 dt_r1 = [[-0.1, float_gap], [dt_len, float_gap], [dt_len, 3.5], [-0.1, 2.5]];
 
 tenon_len = 12;

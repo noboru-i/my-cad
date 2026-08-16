@@ -51,6 +51,7 @@ margin = 0.5;    // デバイス周囲の遊び (片側)
 lip_h  = 2.5;    // 位置決めリブの高さ
 lip_w  = 3;      // 位置決めリブの幅
 corner_r = 4;    // 外形コーナーR
+tp_stopper_w = 10; // トラックパッド手前ストッパーの幅 (左右コーナー2箇所、全幅の細長リブは強度不足のため避ける)
 
 /* [キーボードゴム足凹み] */
 kb_foot_d   = 9;    // ゴム足直径 (要実測)
@@ -93,38 +94,47 @@ module rrect(w, d, h, r) { // 角丸板
 module base_plate() {
   difference() {
     union() {
-      // 板本体
-      rrect(board_w, board_d, base_t, corner_r);
-      // キーボード位置決めリブ (左右+奥)
-      translate([0, board_d - kb_zone_d, base_t]) {
-        cube([lip_w, kb_zone_d, lip_h]);                       // 左
-        translate([board_w - lip_w, 0, 0])
-          cube([lip_w, kb_zone_d, lip_h]);                     // 右
-        translate([0, kb_zone_d - lip_w, 0])
-          cube([board_w, lip_w, lip_h]);                       // 奥
+      difference() {
+        union() {
+          // 板本体
+          rrect(board_w, board_d, base_t, corner_r);
+          // キーボード位置決めリブ (左右+手前+奥)
+          translate([0, board_d - kb_zone_d, base_t]) {
+            cube([lip_w, kb_zone_d, lip_h]);                       // 左
+            translate([board_w - lip_w, 0, 0])
+              cube([lip_w, kb_zone_d, lip_h]);                     // 右
+            translate([0, kb_zone_d - lip_w, 0])
+              cube([board_w, lip_w, lip_h]);                       // 奥
+            cube([board_w, lip_w, lip_h]);                         // 手前 (キーボードの手前ズレ防止)
+          }
+          // リストレスト位置決めペグ (左右)
+          for (y = peg_ys) {
+            translate([peg_inset_x, y, base_t])
+              cylinder(d = peg_d, h = peg_h);
+            translate([board_w - peg_inset_x, y, base_t])
+              cylinder(d = peg_d, h = peg_h);
+          }
+        }
+        // トラックパッド用 貫通切り欠き (トラックパッドは机に直置き)
+        translate([(board_w - tp_slot_w)/2, -1, -1])
+          cube([tp_slot_w, tp_exposed_d + 1 + margin, base_t + 2]);
+        // ※ tp_overlap 分はベース板(キーボード載置部)がトラックパッド後端上を覆う
+        //   → その領域は板を薄くしてトラックパッド後端(10.9mm)と干渉しないよう逃がす
+        translate([(board_w - tp_slot_w)/2, tp_exposed_d - 1, -1])
+          cube([tp_slot_w, tp_overlap + margin + 1, 1 + base_t - overhang_t()]);
+        // キーボードゴム足凹み (4箇所)
+        for (fx = [kb_foot_inset_x, kb_w - kb_foot_inset_x])
+          for (fy = [kb_foot_inset_y, kb_d - kb_foot_inset_y])
+            translate([lip_w + margin + fx,
+                       board_d - lip_w - margin - kb_d + fy,
+                       base_t - kb_foot_dep])
+              cylinder(d = kb_foot_d, h = kb_foot_dep + 1);
       }
-      // リストレスト位置決めペグ (左右)
-      for (y = peg_ys) {
-        translate([peg_inset_x, y, base_t])
-          cylinder(d = peg_d, h = peg_h);
-        translate([board_w - peg_inset_x, y, base_t])
-          cylinder(d = peg_d, h = peg_h);
-      }
+      // トラックパッド手前ストッパー (左右コーナー2箇所。土台の厚み部分に直結させ、無支持の細長リブによる折れを防ぐ)
+      for (x = [(board_w - tp_slot_w)/2, (board_w + tp_slot_w)/2 - tp_stopper_w])
+        translate([x, 0, 0])
+          cube([tp_stopper_w, lip_w, lip_h]);
     }
-    // トラックパッド用 貫通切り欠き (トラックパッドは机に直置き)
-    translate([(board_w - tp_slot_w)/2, -1, -1])
-      cube([tp_slot_w, tp_exposed_d + 1 + margin, base_t + 2]);
-    // ※ tp_overlap 分はベース板(キーボード載置部)がトラックパッド後端上を覆う
-    //   → その領域は板を薄くしてトラックパッド後端(10.9mm)と干渉しないよう逃がす
-    translate([(board_w - tp_slot_w)/2, tp_exposed_d - 1, -1])
-      cube([tp_slot_w, tp_overlap + margin + 1, 1 + base_t - overhang_t()]);
-    // キーボードゴム足凹み (4箇所)
-    for (fx = [kb_foot_inset_x, kb_w - kb_foot_inset_x])
-      for (fy = [kb_foot_inset_y, kb_d - kb_foot_inset_y])
-        translate([lip_w + margin + fx,
-                   board_d - lip_w - margin - kb_d + fy,
-                   base_t - kb_foot_dep])
-          cylinder(d = kb_foot_d, h = kb_foot_dep + 1);
     // 分割線 (オプション)
     if (split_base && part != 0)
       split_cut();

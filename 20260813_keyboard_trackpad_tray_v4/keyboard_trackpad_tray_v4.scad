@@ -9,6 +9,9 @@
 //   Magic Trackpad 2: 160 x 114.9 x 4.9-10.9mm (Apple/Wikipedia)
 // =====================================================================
 
+include <BOSL2/std.scad>
+include <BOSL2/rounding.scad>
+
 /* [表示・出力] */
 // 表示するパーツ: 0=組立プレビュー, 1=ベース板のみ, 2=リストレスト左, 3=リストレスト右, 4=傾斜ウェッジ
 part = 0; // [0:Assembly, 1:Base, 2:WristRest_L, 3:WristRest_R, 4:TiltWedge]
@@ -38,6 +41,8 @@ rest_tp_cover = 20;  // [0:60]
 rest_chamfer_angle = 30; // [0:60]
 // リストレスト奥行 (トラックパッド手前端からの張り出し含む)
 rest_d = 98;
+// リストレスト上面のエッジ加工 (R5的な丸み)。板厚を超える分は自然と全丸(ブルノーズ)になる
+rest_edge_r = 5; // [1:10]
 
 /* [板厚・クリアランス] */
 base_t = 6;      // ベース板厚 (実物同等)
@@ -52,6 +57,16 @@ kb_foot_d   = 9;    // ゴム足直径 (要実測)
 kb_foot_dep = 0.8;  // 凹み深さ
 kb_foot_inset_x = 15; // 左右端からの距離 (要実測)
 kb_foot_inset_y = 8;  // 前後端からの距離 (要実測)
+
+/* [リストレスト位置決めペグ] */
+// ベース側凸ペグとリストレスト側穴で前後・左右のズレを止める (楔なし、上下方向は現状の印刷向きのまま)
+// リストレストは外側端 (x=0基準) をベースの外側端に揃えて置くため、
+// peg_inset_x / peg_ys は「外側端からの距離」で固定し、rest_tp_cover を変えた別サイズのリストレストでも共通で使い回せる
+peg_d   = 6;    // ペグ直径
+peg_h   = rest_t - 0.3; // ペグ高さ (リストレスト板厚よりわずかに低く抑え、天面から突き出さない)
+peg_clearance = 0.3; // リストレスト側の穴クリアランス (直径に加算)
+peg_inset_x = 14; // 外側端からのペグ位置 (X)
+peg_ys = [20, 78]; // ペグ位置 (Y, 外側端基準・2点で回転もロック)
 
 // ---------------------------------------------------------------------
 // 派生値
@@ -88,6 +103,13 @@ module base_plate() {
         translate([0, kb_zone_d - lip_w, 0])
           cube([board_w, lip_w, lip_h]);                       // 奥
       }
+      // リストレスト位置決めペグ (左右)
+      for (y = peg_ys) {
+        translate([peg_inset_x, y, base_t])
+          cylinder(d = peg_d, h = peg_h);
+        translate([board_w - peg_inset_x, y, base_t])
+          cylinder(d = peg_d, h = peg_h);
+      }
     }
     // トラックパッド用 貫通切り欠き (トラックパッドは机に直置き)
     translate([(board_w - tp_slot_w)/2, -1, -1])
@@ -119,14 +141,20 @@ function overhang_t() =
 module wrist_rest(side = -1) {
   w = (board_w - tp_slot_w)/2 + rest_tp_cover; // 板幅: ベース手前 + トラックパッド覆い
   cut = rest_tp_cover * tan(rest_chamfer_angle) + 8; // 斜めカットの奥行成分
+  footprint = round_corners([[0, 0], [w, 0], [w, rest_d], [0, rest_d]], r = corner_r);
+  edge_r = min(rest_edge_r, rest_t - 0.1); // 板厚を超えるRは指定できないため丸める
   mirror([side > 0 ? 1 : 0, 0, 0])
     difference() {
-      rrect(w, rest_d, rest_t, corner_r);
+      offset_sweep(footprint, height = rest_t, top = os_circle(r = edge_r));
       // 内側上部(トラックパッド側の奥)を斜めにカット → トラックパッド操作域を拡大
       translate([w - rest_tp_cover, rest_d, -1])
         linear_extrude(rest_t + 2)
           polygon([[ -1, 1], [rest_tp_cover + 1, 1],
                    [rest_tp_cover + 1, -cut], [-1, -0.01]]);
+      // ベース側位置決めペグ用の貫通穴 (外側端 x=0 基準、mirror() で左右とも揃う)
+      for (y = peg_ys)
+        translate([peg_inset_x, y, -1])
+          cylinder(d = peg_d + peg_clearance, h = rest_t + 2);
     }
 }
 

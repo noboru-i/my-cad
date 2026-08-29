@@ -13,12 +13,22 @@ include <BOSL2/std.scad>
 include <BOSL2/rounding.scad>
 
 /* [表示・出力] */
-// 表示するパーツ: 0=組立プレビュー, 1=ベース板のみ, 2=リストレスト左, 3=リストレスト右, 4=傾斜ウェッジ
-part = 0; // [0:Assembly, 1:Base, 2:WristRest_L, 3:WristRest_R, 4:TiltWedge]
+// 表示するパーツ: 0=組立プレビュー, 1=ベース板(分割なし), 2=リストレスト左, 3=リストレスト右, 4=傾斜ウェッジ,
+// 5=ベース前左, 6=ベース前右, 7=ベース後左, 8=ベース後右 (Bambu Lab A1 mini 用 2x2 グリッド分割)
+part = 0; // [0:Assembly, 1:Base, 2:WristRest_L, 3:WristRest_R, 4:TiltWedge, 5:Base_FrontLeft, 6:Base_FrontRight, 7:Base_RearLeft, 8:Base_RearRight]
 // デバイスのダミーモデルを表示 (プレビュー用)
 show_devices = false;
-// ベース板を左右2分割して出力 (印刷ベッドが280mmに満たない場合)
-split_base = true;
+
+/* [分割 (Bambu Lab A1 mini: ビルドボリューム 180x180mm 対応)] */
+// ベース板の Y 方向分割線位置。トラックパッド開口部内 (材が無い領域) かつ
+// リストレスト固定ペグ(y=20,78)・キーボード位置決めリブ・ゴム足凹みのいずれとも重ならない位置を選ぶ
+split_y = 90;
+// 分割ピース同士の位置合わせピン直径
+seam_pin_d = 4;
+// ピンの突き出し長さ (相手側のピースにこの半分ずつめり込む)
+seam_pin_len = 4;
+// 穴側クリアランス (直径に加算)
+seam_pin_clearance = 0.3;
 
 /* [デバイス寸法 (実測で微調整可)] */
 kb_w = 279.0;   // Magic Keyboard 幅
@@ -43,6 +53,12 @@ rest_chamfer_angle = 30; // [0:60]
 rest_d = 98;
 // リストレスト上面のエッジ加工 (R5的な丸み)。板厚を超える分は自然と全丸(ブルノーズ)になる
 rest_edge_r = 5; // [1:10]
+
+/* [ケーブル取り回し] */
+// キーボード・トラックパッドとも充電端子は奥辺中央にある実測前提。
+// トラックパッド端子を露出させ、そこからキーボード下を通してトレイ背面まで直進させる
+cable_channel_w = 16;      // チャンネル幅 (中央配置) [10:30]
+cable_groove_d = 2.5;      // 端子露出部から奥へ、キーボード下を通す溝の深さ (板厚を貫通しない) [1:4]
 
 /* [板厚・クリアランス] */
 base_t = 6;      // ベース板厚 (実物同等)
@@ -79,7 +95,23 @@ board_d = kb_d + 2*margin + lip_w + tp_exposed_d; // 全奥行
 kb_zone_d = kb_d + 2*margin + lip_w;           // キーボード載置部の奥行
 $fn = 48;
 
+// ケーブルチャンネル (X中央 = トラックパッド端子・キーボード端子とも中央想定)
+cable_channel_x0 = board_w/2 - cable_channel_w/2;
+// トラックパッド用切り欠き (Y ~ tp_exposed_d+margin で終わる) の終端に直結させ、
+// 開口部との間に壁を残さないようにする
+cable_port_y0 = tp_exposed_d;                  // 完全貫通の開始 (トラックパッド開口部の終端と重ねる)
+cable_port_y1 = tp_d + margin;                 // トラックパッド端子奥 (オーバーラップ終端に一致)
+
 echo(str("全体寸法: ", board_w, " x ", board_d, " mm (参考: 実物 280 x 214)"));
+
+// 分割ピース境界ボックス用の張り出し余白 (外形・突起物を確実に包含)
+split_pad = 10;
+// Y方向継ぎ目(前後)のピン位置: 左右の無垢な側桁部分 (トラックパッド開口の外側)
+seam_y_pin_xs = [30, board_w - 30];
+// X方向継ぎ目(左右)のピン位置: キーボード載置部の無垢な領域 (前後リブ・ゴム足凹みを避ける)
+seam_x_pin_ys = [130, 190];
+// ピンの高さ (ベース板底面=印刷ベッド面に接するようにし、突き出し部が宙に浮かないようにする)
+seam_pin_z = seam_pin_d / 2;
 
 // ---------------------------------------------------------------------
 // 部品モジュール
@@ -129,15 +161,18 @@ module base_plate() {
                        board_d - lip_w - margin - kb_d + fy,
                        base_t - kb_foot_dep])
               cylinder(d = kb_foot_d, h = kb_foot_dep + 1);
+        // トラックパッド充電端子の露出 (端子は背面中央、完全貫通させて指/コネクタが入るようにする)
+        translate([cable_channel_x0, cable_port_y0, -1])
+          cube([cable_channel_w, cable_port_y1 - cable_port_y0, base_t + 2]);
+        // ケーブル溝: 端子露出部からキーボード下を通りトレイ背面まで直進 (浅く彫るだけで板厚は貫通しない)
+        translate([cable_channel_x0, cable_port_y1, base_t - cable_groove_d])
+          cube([cable_channel_w, board_d - cable_port_y1, cable_groove_d + lip_h + 1]);
       }
       // トラックパッド手前ストッパー (左右コーナー2箇所。土台の厚み部分に直結させ、無支持の細長リブによる折れを防ぐ)
       for (x = [(board_w - tp_slot_w)/2, (board_w + tp_slot_w)/2 - tp_stopper_w])
         translate([x, 0, 0])
           cube([tp_stopper_w, lip_w, lip_h]);
     }
-    // 分割線 (オプション)
-    if (split_base && part != 0)
-      split_cut();
   }
 }
 
@@ -181,10 +216,58 @@ module tilt_wedge() {
   }
 }
 
-// ベッドに乗らない場合の中央分割 (簡易ダボ付き)
-module split_cut() {
-  translate([board_w/2 - 0.2, -1, -1])
-    cube([0.4, board_d + 2, base_t + lip_h + 2]);
+// ---------------------------------------------------------------------
+// ベース板 2x2 グリッド分割 (Bambu Lab A1 mini のビルドボリューム 180x180mm 対応)
+// 継ぎ目には位置合わせ用の丸ピンを設け、接着時のズレを防ぐ
+// ---------------------------------------------------------------------
+
+// Y方向(前後)継ぎ目のピン: 軸はY方向。中心を split_y に置き、前後ピースへ半分ずつ食い込ませる
+module seam_pin_y(x, y, len = seam_pin_len, d = seam_pin_d) {
+  translate([x, y, seam_pin_z])
+    rotate([-90, 0, 0])
+      cylinder(d = d, h = len, center = true);
+}
+
+// X方向(左右)継ぎ目のピン: 軸はX方向
+module seam_pin_x(x, y, len = seam_pin_len, d = seam_pin_d) {
+  translate([x, y, seam_pin_z])
+    rotate([0, 90, 0])
+      cylinder(d = d, h = len, center = true);
+}
+
+// 分割ピースの外形を切り出すバウンディングボックス
+// qx = -1:左, 1:右 / qy = -1:前(トラックパッド側), 1:後(キーボード側)
+module quadrant_box(qx, qy) {
+  x0 = qx < 0 ? -split_pad : board_w/2;
+  x1 = qx < 0 ? board_w/2 : board_w + split_pad;
+  y0 = qy < 0 ? -split_pad : split_y;
+  y1 = qy < 0 ? split_y : board_d + split_pad;
+  translate([x0, y0, -split_pad])
+    cube([x1 - x0, y1 - y0, base_t + lip_h + 2*split_pad]);
+}
+
+module base_plate_quadrant(qx, qy) {
+  // Y継ぎ目ピンは自ピースの左右側 (qx) に対応する1本だけを使う
+  seam_y_pin_x = qx < 0 ? seam_y_pin_xs[0] : seam_y_pin_xs[1];
+  difference() {
+    union() {
+      intersection() {
+        base_plate();
+        quadrant_box(qx, qy);
+      }
+      // 突起ピン (オス側): 前ピースがY継ぎ目のオス、左後ピースがX継ぎ目のオス
+      if (qy < 0)
+        seam_pin_y(seam_y_pin_x, split_y);
+      if (qx < 0 && qy > 0)
+        for (y = seam_x_pin_ys) seam_pin_x(board_w/2, y);
+    }
+    // 穴 (メス側): 後ピースがY継ぎ目のメス、右後ピースがX継ぎ目のメス
+    if (qy > 0)
+      seam_pin_y(seam_y_pin_x, split_y, len = seam_pin_len + 2, d = seam_pin_d + seam_pin_clearance);
+    if (qx > 0 && qy > 0)
+      for (y = seam_x_pin_ys)
+        seam_pin_x(board_w/2, y, len = seam_pin_len + 2, d = seam_pin_d + seam_pin_clearance);
+  }
 }
 
 // デバイスダミー (プレビュー)
@@ -218,4 +301,12 @@ if (part == 0) {
   wrist_rest(1);
 } else if (part == 4) {
   tilt_wedge();
+} else if (part == 5) {
+  base_plate_quadrant(-1, -1); // 前左
+} else if (part == 6) {
+  base_plate_quadrant(1, -1);  // 前右
+} else if (part == 7) {
+  base_plate_quadrant(-1, 1);  // 後左
+} else if (part == 8) {
+  base_plate_quadrant(1, 1);   // 後右
 }

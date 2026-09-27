@@ -65,3 +65,11 @@ v2 は「4つ組んでも全然強度が出ない（ぐらぐら）」「R1 が�
 - トラックパッドの充電プラグは R2 中央のブリッジアーチ（幅20×高9.5）を通してキーボード下へ。ケーブルは R3/R4 の窓（x=+25、下弦 2mm を残した開口）から背面へ抜ける。キーボードは背面からそのまま充電可
 - リストレスト板の上面（12mm）はトラックパッド面より高い（意図した設計）
 - 検証用 part: `assembly` / `check_fit1..3` / `check_interference`（デバイス非接触）/ `check_lattice`（相欠き非干渉）/ `check_skins`（ほぞと板の非干渉）— check 系はすべて空レンダリングが合格
+
+## リポジトリ表示用の構成
+
+- メインSCAD: `keyboard_trackpad_tray_v2.scad`
+- 生成スクリプト: `render_stl.sh`
+- 印刷用STL: `stl/plate1.stl`、`stl/plate2.stl`、`stl/plate3.stl`
+- 組立STL: 未作成。組立確認は `part="assembly"` のSCADプレビューで行う。
+- BOSL2: 使用していない

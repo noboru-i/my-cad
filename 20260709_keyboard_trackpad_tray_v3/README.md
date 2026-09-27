@@ -77,3 +77,11 @@ openscad --render -D 'part="riser_r"' -D 'riser_h=8' -o stl/riser_r_h8.stl keybo
 - トラックパッドの充電プラグは R2 中央のブリッジアーチ（幅20×高9.5）を通してキーボード下へ。ケーブルは R3/R4 の窓（x=+25）から背面へ抜ける
 - パームレスト上面は 13.5mm（デッキより 0.9mm 高い、意図した設計）
 - 検証用 part: `assembly` / `check_fit1..4`（2D、SVG 出力）/ `check_interference`（デバイス非接触）/ `check_lattice`（相欠き非干渉）/ `check_skins`（ほぞと板の非干渉）/ `check_riser`（ライザーと格子の非干渉）— check 系はすべて空レンダリングが合格。`riser_h=0/4/8`、`tp_exposed_w=140` で確認済み
+
+## リポジトリ表示用の構成
+
+- メインSCAD: `keyboard_trackpad_tray_v3.scad`
+- 生成スクリプト: `render_stl.sh`
+- 印刷用STL: `stl/plate1.stl`、`stl/plate2.stl`、`stl/plate3.stl`、`stl/plate4.stl`、`stl/riser_l_h8.stl`、`stl/riser_r_h8.stl`
+- 組立STL: 未作成。組立確認は `part="assembly"` のSCADプレビューで行う。
+- BOSL2: 使用していない

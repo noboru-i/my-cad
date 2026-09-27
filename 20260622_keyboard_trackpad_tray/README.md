@@ -48,3 +48,11 @@ done
 - Magic Keyboard / Magic Trackpad ともに充電端子は背面中央にある前提で、上側へ抜けるケーブル用スリットと Trackpad 用コネクタ逃げを入れている
 - Trackpad 側のケーブル経路は中央の差し込みタブを避けるため少し右へ逃がしている。USB-C コネクタやケーブルが太い場合は `keyboard_cable_gap` / `trackpad_cable_gap` / `trackpad_connector_pocket_width` を大きくする
 - 裏面を完全にフラットにするため、標準では `use_integral_join_tabs = false` にしている
+
+## リポジトリ表示用の構成
+
+- メインSCAD: `keyboard_trackpad_tray.scad`
+- 生成スクリプト: `render_stl.sh`
+- 印刷用STL: `stl/back_left.stl`、`stl/back_right.stl`、`stl/front_left.stl`、`stl/front_right.stl`
+- 組立STL: 未作成。4分割の組立確認はSCADのプレビューで行う。
+- BOSL2: `BOSL2` シンボリックリンクを使用

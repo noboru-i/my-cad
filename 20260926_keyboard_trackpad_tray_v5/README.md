@@ -139,3 +139,11 @@ openscad --render -D 'part=6' -o stl/assembled.stl keyboard_trackpad_tray_v5.sca
 - 土台とリストレストは中身の詰まった形なので、重さはほぼインフィルで決まる。Lightning は天面を支える所にだけインフィルを入れるので、材料と時間が大きく減る（強度は低い）
 - Wall loops は減らさない。ダブテールやポケットの寸法精度は壁で決まるので、はめ合いのテストにならなくなる
 - インフィル 0% は不可。土台の天面を支えるものがなくなり、垂れる
+
+## リポジトリ表示用の構成
+
+- メインSCAD: `keyboard_trackpad_tray_v5.scad`
+- 生成スクリプト: `render_stl.sh`
+- 印刷用STL: `stl/trackpad_frame.stl`、`stl/wrist_rest_l.stl`、`stl/wrist_rest_r.stl`、`stl/keyboard_base_l.stl`、`stl/keyboard_base_r.stl`
+- 組立STL: `stl/assembled.stl`（組立確認用であり、印刷用ではない）
+- BOSL2: `BOSL2` シンボリックリンクを使用

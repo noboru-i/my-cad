@@ -2,18 +2,18 @@
 
 ノートPCまたはタブレット用スタンド。
 
-## 現在のファイル
+## 構成
 
 - メインSCAD: `laptop_tablet_stand.scad`
-- 生成済みSTL: `laptop_tablet_stand.stl`
-- `render_stl.sh`: 未整備
+- 出力STL: `stl/laptop_tablet_stand.stl`
+- `render_stl.sh`: 上記STLを再生成する
 - 組立STL: 不要（単一パーツ）
-- BOSL2: `BOSL2` シンボリックリンクあり
+- BOSL2: `BOSL2` シンボリックリンクを使用
+
+既存の直下STLは移動・削除せず保持する。
 
 ## 再生成
 
 ```bash
-openscad --render -o laptop_tablet_stand.stl laptop_tablet_stand.scad
+./render_stl.sh
 ```
-
-これは旧配置のモデルであり、STLはモデル直下に保持している。

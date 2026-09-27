@@ -2,19 +2,18 @@
 
 水耕栽培用の植物ホルダー。
 
-## 現在のファイル
+## 構成
 
 - メインSCAD: `water_plant_holder.scad`
-- 生成済みSTL: `water_plant_holder.stl`
-- スライサー用3MF: `water_plant_holder.scad.3mf`
-- `render_stl.sh`: 未整備
+- 出力STL: `stl/water_plant_holder.stl`
+- `render_stl.sh`: 上記STLを再生成する
 - 組立STL: 不要（単一パーツ）
 - BOSL2: 使用していない
+
+既存の直下STL・3MFは移動・削除せず保持する。
 
 ## 再生成
 
 ```bash
-openscad --render -o water_plant_holder.stl water_plant_holder.scad
+./render_stl.sh
 ```
-
-これは旧配置のモデルであり、STLはモデル直下に保持している。

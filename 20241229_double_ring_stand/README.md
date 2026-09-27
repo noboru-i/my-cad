@@ -2,19 +2,18 @@
 
 二重リング形状のスタンド。
 
-## 現在のファイル
+## 構成
 
 - メインSCAD: `double_ring_stand.scad`
-- 生成済みSTL: `double_ring_stand.stl`
-- スライサー用3MF: `double_ring_stand.3mf`
-- `render_stl.sh`: 未整備
+- 出力STL: `stl/double_ring_stand.stl`
+- `render_stl.sh`: 上記STLを再生成する
 - 組立STL: 不要（単一パーツ）
 - BOSL2: 使用していない
+
+既存の直下STL・3MFは移動・削除せず保持する。
 
 ## 再生成
 
 ```bash
-openscad --render -o double_ring_stand.stl double_ring_stand.scad
+./render_stl.sh
 ```
-
-これは旧配置のモデルであり、STLはモデル直下に保持している。

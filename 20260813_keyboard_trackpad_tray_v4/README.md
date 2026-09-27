@@ -75,5 +75,5 @@ openscad --render -D 'part=4' -D 'tp_angle=8' -o stl/tilt_wedge_a8.stl keyboard_
 - メインSCAD: `keyboard_trackpad_tray_v4.scad`
 - 生成スクリプト: `render_stl.sh`
 - 印刷用STL: `stl/base_front_left.stl`、`stl/base_front_right.stl`、`stl/base_rear_left.stl`、`stl/base_rear_right.stl`、`stl/wrist_rest_l.stl`、`stl/wrist_rest_r.stl`
-- 組立STL: 未作成。組立確認は `part=0` のSCADプレビューで行う。
+- 組立STL: `stl/assembled.stl`（組立確認用であり、印刷用ではない）
 - BOSL2: `BOSL2` シンボリックリンクあり。ただし現行SCADはBOSL2をincludeしていない。

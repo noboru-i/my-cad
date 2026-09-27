@@ -71,5 +71,5 @@ v2 は「4つ組んでも全然強度が出ない（ぐらぐら）」「R1 が�
 - メインSCAD: `keyboard_trackpad_tray_v2.scad`
 - 生成スクリプト: `render_stl.sh`
 - 印刷用STL: `stl/plate1.stl`、`stl/plate2.stl`、`stl/plate3.stl`
-- 組立STL: 未作成。組立確認は `part="assembly"` のSCADプレビューで行う。
+- 組立STL: `stl/assembled.stl`（組立確認用であり、印刷用ではない）
 - BOSL2: 使用していない

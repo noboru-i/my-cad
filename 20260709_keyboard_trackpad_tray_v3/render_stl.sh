@@ -12,3 +12,4 @@ for h in 8; do
       -o "stl/${p}_h${h}.stl" keyboard_trackpad_tray_v3.scad
   done
 done
+openscad --render -D 'part="assembly"' -o stl/assembled.stl keyboard_trackpad_tray_v3.scad

@@ -2,18 +2,18 @@
 
 トレーディングカードゲーム用マーカー。
 
-## 現在のファイル
+## 構成
 
 - メインSCAD: `tcg_marker.scad`
-- 生成済みSTL: `tcg_marker.stl`
-- `render_stl.sh`: 未整備
+- 出力STL: `stl/tcg_marker.stl`
+- `render_stl.sh`: 上記STLを再生成する
 - 組立STL: 不要（単一パーツ）
-- BOSL2: `BOSL2` シンボリックリンクあり
+- BOSL2: `BOSL2` シンボリックリンクを使用
+
+既存の直下STLは移動・削除せず保持する。
 
 ## 再生成
 
 ```bash
-openscad --render -o tcg_marker.stl tcg_marker.scad
+./render_stl.sh
 ```
-
-これは旧配置のモデルであり、STLはモデル直下に保持している。

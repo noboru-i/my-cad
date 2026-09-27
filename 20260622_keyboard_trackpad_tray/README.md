@@ -54,5 +54,5 @@ done
 - メインSCAD: `keyboard_trackpad_tray.scad`
 - 生成スクリプト: `render_stl.sh`
 - 印刷用STL: `stl/back_left.stl`、`stl/back_right.stl`、`stl/front_left.stl`、`stl/front_right.stl`
-- 組立STL: 未作成。4分割の組立確認はSCADのプレビューで行う。
+- 組立STL: `stl/assembled.stl`（組立確認用であり、印刷用ではない）
 - BOSL2: `BOSL2` シンボリックリンクを使用

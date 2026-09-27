@@ -210,7 +210,10 @@ module wrist_rest_left() {
      [rest_tp_cover, rest_y1 - rest_chamfer_d], [0, rest_y1], [0, rest_y1 + ext], [rest_x_out, rest_y1 + ext]],
     r = [rest_corner_r, 2, 2, 0, 0, 0]);
   difference() {
-    offset_sweep(footprint, height = rest_h, top = os_chamfer(width = rest_top_chamfer));
+    vnf_polyhedron(vnf_triangulate(
+      offset_sweep(footprint, height = rest_h,
+                   top = os_chamfer(width = rest_top_chamfer))
+    ));
     translate([rest_x_out - 1, rest_y1, -1])
       cube([rest_side_w + frame_wall + margin + rest_tp_cover + 2, ext + 1, rest_h + 2]);
     // 枠とトラックパッドの上を覆う部分の下側をくり抜く (ダブテール凸は残す)

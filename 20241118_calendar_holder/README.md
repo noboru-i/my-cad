@@ -2,18 +2,18 @@
 
 卓上カレンダー用ホルダー。
 
-## 現在のファイル
+## 構成
 
 - メインSCAD: `model.scad`
-- 生成済みSTL: `model.stl`
-- `render_stl.sh`: 未整備
+- 出力STL: `stl/calendar_holder.stl`
+- `render_stl.sh`: 上記STLを再生成する
 - 組立STL: 不要（単一パーツ）
 - BOSL2: 使用していない
+
+既存の直下STLは移動・削除せず保持する。
 
 ## 再生成
 
 ```bash
-openscad --render -o model.stl model.scad
+./render_stl.sh
 ```
-
-これは旧配置のモデルであり、STLはモデル直下に保持している。`stl/`と生成スクリプトへの移行は標準化タスクで行う。

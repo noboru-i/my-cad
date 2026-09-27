@@ -9,3 +9,4 @@ openscad --render -D 'part=7' -o stl/base_rear_left.stl keyboard_trackpad_tray_v
 openscad --render -D 'part=8' -o stl/base_rear_right.stl keyboard_trackpad_tray_v4.scad
 openscad --render -D 'part=2' -o stl/wrist_rest_l.stl keyboard_trackpad_tray_v4.scad
 openscad --render -D 'part=3' -o stl/wrist_rest_r.stl keyboard_trackpad_tray_v4.scad
+openscad --render -D 'part=0' -o stl/assembled.stl keyboard_trackpad_tray_v4.scad

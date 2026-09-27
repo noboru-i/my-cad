@@ -1,20 +1,20 @@
-// outside x [mm]
-width = 30;  // [10:0.1:180]
-// outside y [mm]
-length = 80; // [10:0.1:180]
-// outside z [mm]
-height = 30; // [10:0.1:180]
+/* [モデル選択] */
+variant = "standard"; // [standard:標準, small:小型]
 
-// wall thickness [mm]
-wall = 2; // [0.5:0.1:5]
+/* [外形寸法 mm] */
+width = variant == "small" ? 20 : 30;
+length = variant == "small" ? 20 : 80;
+height = variant == "small" ? 10 : 30;
 
-module model()
-{
-    difference() {
-        cube([width, length, height]);
-        translate([wall, wall, wall])
-            cube([width - wall * 2, length - wall * 2, height - wall]);
-    }
+/* [肉厚 mm] */
+wall = variant == "small" ? 1 : 2;
+
+module model() {
+  difference() {
+    cube([width, length, height]);
+    translate([wall, wall, wall])
+      cube([width - wall * 2, length - wall * 2, height - wall]);
+  }
 }
 
 model();

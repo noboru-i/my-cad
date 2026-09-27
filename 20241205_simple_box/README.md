@@ -1,21 +1,26 @@
 # simple_box
 
-単純な箱のモデルと小型版。
+標準サイズと小型サイズを選択できる単純な箱。
 
-## 現在のファイル
+## 構成
 
-- SCAD: `simple_box.scad`、`simple_box_small.scad`
-- 生成済みSTL: `simple_box.stl`、`simple_box_small.stl`
-- スライサー用3MF: `simple_box.3mf`、`simple_box_small.3mf`
-- `render_stl.sh`: 未整備
-- 組立STL: 不要（各SCADは単一パーツ）
+- メインSCAD: `simple_box.scad`
+- 出力STL: `stl/simple_box.stl`、`stl/simple_box_small.stl`
+- `render_stl.sh`: 2種類のサイズを再生成する
+- 組立STL: 不要（各出力は単一パーツ）
 - BOSL2: 使用していない
+
+旧来の `simple_box_small.scad` は、単一SCAD構成への移行に伴い `legacy/` に保管する。既存の直下STL・3MFは移動・削除せず保持する。
 
 ## 再生成
 
 ```bash
-openscad --render -o simple_box.stl simple_box.scad
-openscad --render -o simple_box_small.stl simple_box_small.scad
+./render_stl.sh
 ```
 
-このディレクトリには旧来の2種類のSCADがある。標準化では単一モデルへの分割またはディレクトリ構成を別途判断する。
+個別に出力する場合:
+
+```bash
+openscad --render -D 'variant="standard"' -o stl/simple_box.stl simple_box.scad
+openscad --render -D 'variant="small"' -o stl/simple_box_small.stl simple_box.scad
+```

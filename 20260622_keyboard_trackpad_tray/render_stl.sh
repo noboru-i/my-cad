@@ -13,3 +13,4 @@ for p in "${parts[@]}"; do
   echo "Rendering $p"
   openscad -D "part=\"$p\"" -o "stl/$p.stl" keyboard_trackpad_tray.scad
 done
+openscad --render -D 'part="full"' -o stl/assembled.stl keyboard_trackpad_tray.scad

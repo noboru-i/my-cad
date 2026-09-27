@@ -83,5 +83,5 @@ openscad --render -D 'part="riser_r"' -D 'riser_h=8' -o stl/riser_r_h8.stl keybo
 - メインSCAD: `keyboard_trackpad_tray_v3.scad`
 - 生成スクリプト: `render_stl.sh`
 - 印刷用STL: `stl/plate1.stl`、`stl/plate2.stl`、`stl/plate3.stl`、`stl/plate4.stl`、`stl/riser_l_h8.stl`、`stl/riser_r_h8.stl`
-- 組立STL: 未作成。組立確認は `part="assembly"` のSCADプレビューで行う。
+- 組立STL: `stl/assembled.stl`（組立確認用であり、印刷用ではない）
 - BOSL2: 使用していない

@@ -13,7 +13,8 @@ include <BOSL2/rounding.scad>
 
 /* [表示・出力] */
 // 2, 3 は上下反転した印刷向きで出力する。6 は組立状態の確認用 (ダミーなし、印刷用ではない)
-part = 0; // [0:Assembly, 1:TrackpadFrame, 2:WristRest_L, 3:WristRest_R, 4:KeyboardBase_L, 5:KeyboardBase_R, 6:AssembledSTL]
+// 7 は A1 mini の 1 プレートに全パーツを並べた印刷用 (--enable=lazy-union で 3MF に出すとパーツごとに別オブジェクトになる)
+part = 0; // [0:Assembly, 1:TrackpadFrame, 2:WristRest_L, 3:WristRest_R, 4:KeyboardBase_L, 5:KeyboardBase_R, 6:AssembledSTL, 7:PrintPlate]
 show_devices = true;
 
 /* [デバイス寸法 (実測で微調整可)] */
@@ -65,8 +66,8 @@ kb_tp_overlap = 11;
 kb_front_stop_h = 2.5; // リストレスト奥面が載置面から立ち上がる高さ (キーボード手前のストッパー)
 kb_corner_r = 4;       // 奥側外側コーナーR
 kb_split_x = tp_port_x + 25; // 左右分割位置 (ケーブル溝を避ける)
-kb_cable_w = 16;       // トラックパッドのケーブルを背面へ通す溝 (底面側) の幅
-kb_cable_h = 8;        // 同 高さ
+kb_cable_w = 16;       // トラックパッドのケーブルを背面へ通す溝 (底面側) の天井の幅
+kb_cable_h = 8;        // 同 高さ (側面は 45° で底面に向かって広がるので、立てて印刷してもサポート不要)
 
 /* [ダブテール] */
 // 枠↔リストレスト: リストレスト側が凸、枠の外側面が溝 (上から差し込む)
@@ -80,6 +81,10 @@ dt_clearance = 0.2;  // 溝側のクリアランス (片側)
 dt_y_ratios = [0.45, 0.8]; // 枠↔リストレストの位置 (枠奥行比)。手前は枠が低いので避ける
 dt_rest_x_ratios = [0.3, 0.75]; // リストレスト↔土台の位置 (枠より外側のリストレスト幅比)
 dt_seam_y_ratios = [0.3, 0.7];  // 土台 左↔右の位置 (継ぎ目の長さ比)
+
+/* [印刷プレート (part=7)] */
+plate_size = 180;  // A1 mini のビルドプレート
+plate_margin = 2.5; // 枠とプレート端の距離
 
 $fn = 64;
 
@@ -110,6 +115,7 @@ kb_base_y0 = rest_y1 + dt_clearance;  // 土台手前端 (リストレストの�
 kb_base_y1 = kb_front_y + kb_d + margin + kb_lip_w;
 kb_seam_y0 = frame_y1 + dt_clearance; // 継ぎ目の手前端 (枠の奥)
 kb_x0 = tp_w/2 - kb_w/2;              // キーボード左端
+kb_total_h = kb_base_h + kb_h_rear;   // 土台の奥の壁の天面高さ
 dt_rest_xs = [for (r = dt_rest_x_ratios) rest_x_out + rest_side_w * r];
 dt_seam_ys = [for (r = dt_seam_y_ratios) kb_seam_y0 + (kb_base_y1 - kb_seam_y0) * r];
 // 枠↔土台の位置: 左は枠奥辺の直線部左端〜ポート切り欠き、右は継ぎ目〜スイッチ切り欠きの中央
@@ -139,7 +145,7 @@ assert(frame_wall - dt_depth - dt_clearance >= 1, "ダブテール溝と枠内�
 assert(rest_y1 >= dt_ys[len(dt_ys) - 1] + dt_tip_w/2 + 1, "リストレスト奥端が枠↔リストレストのダブテールにかかる。kb_tp_overlap を減らすこと");
 assert(kb_frame_gap >= 1, "キーボード底面が枠に近すぎる。rest_h を上げるか kb_front_stop_h を下げること");
 assert(max(kb_split_x - rest_x_out, tray_x1 - kb_split_x + dt_depth) <= 180, "キーボード土台の片側が 180mm を超える");
-assert(abs(kb_split_x - tp_port_x) - kb_cable_w/2 - dt_depth - dt_clearance >= 1, "継ぎ目がケーブル溝に近すぎる");
+assert(abs(kb_split_x - tp_port_x) - (kb_cable_w/2 + kb_cable_h) - dt_depth - dt_clearance >= 1, "継ぎ目がケーブル溝に近すぎる");
 dt_half_gap = dt_tip_w/2 + dt_clearance + 1; // 枠↔土台ダブテールの中心から周囲に確保する幅
 assert(dt_frame_base_xs[0] - dt_half_gap >= frame_x0 + frame_r
        && dt_frame_base_xs[0] + dt_half_gap <= tp_port_x - tp_port_cut_w/2, "枠↔土台 (左) のダブテールが枠の角かポート切り欠きにかかる");
@@ -351,8 +357,11 @@ module keyboard_base() {
       }
     }
     // トラックパッドのケーブルを背面へ通す溝 (枠のポート切り欠きの奥)
-    translate([tp_port_x - kb_cable_w/2, kb_base_y0 - 1, -1])
-      cube([kb_cable_w, kb_base_y1 - kb_base_y0 + 2, kb_cable_h + 1]);
+    translate([tp_port_x, kb_base_y1 + 1, 0])
+      rotate([90, 0, 0])
+        linear_extrude(kb_base_y1 - kb_base_y0 + 2)
+          polygon([[-(kb_cable_w/2 + kb_cable_h + 1), -1], [kb_cable_w/2 + kb_cable_h + 1, -1],
+                   [kb_cable_w/2, kb_cable_h], [-kb_cable_w/2, kb_cable_h]]);
   }
 }
 
@@ -427,6 +436,53 @@ module model() {
   } else if (part == 6) {
     assembled_parts();
   }
+}
+
+// ---------------------------------------------------------------------
+// 印刷プレート (part=7)
+// 枠は平置き、ほかは立てる。枠のポケットの中に土台 右とリストレストを、枠の奥に土台 左を並べる
+// 各 lay_* はパーツの外接箱の最小角を原点に置く
+// ---------------------------------------------------------------------
+
+module lay_frame() {
+  translate([-frame_x0, -frame_y0, 0]) trackpad_frame();
+}
+
+// 奥面を下にして立てる (継ぎ目の溝以外のダブテールが縦向きになる)
+module lay_base_left() {
+  translate([-rest_x_out, 0, kb_base_y1]) rotate([-90, 0, 0]) keyboard_base_half(-1);
+}
+
+// 右端面を下にして立て、長手を X に向ける (継ぎ目の凸が上を向く)
+module lay_base_right() {
+  translate([-(kb_base_y0 - dt_depth), kb_total_h, tray_x1])
+    rotate([0, 0, -90]) rotate([0, 90, 0]) keyboard_base_half(1);
+}
+
+// 外側面を下にして立て、長手を X に向ける (枠↔リストレストのダブテールが縦向きになる)
+module lay_wrist_rest(side) {
+  if (side < 0)
+    translate([rest_y1, rest_h, -rest_x_out]) rotate([0, 0, 90]) rotate([0, -90, 0]) wrist_rest(-1);
+  else
+    translate([rest_y1, 0, tp_w - rest_x_out]) rotate([0, 0, 90]) rotate([0, 90, 0]) wrist_rest(1);
+}
+
+plate_frame_d = frame_d + dt_depth;        // 奥面のダブテール凸を含む
+plate_pocket_x0 = plate_margin + frame_wall;
+plate_pocket_y0 = plate_margin + frame_wall;
+plate_in_gap = (pocket_d - (kb_total_h + 2 * rest_h)) / 4; // ポケット内に立てるパーツの間隔
+plate_kb_l_y0 = plate_margin + plate_frame_d + (plate_size - plate_margin - plate_frame_d - kb_total_h) / 2;
+assert(plate_margin + frame_w <= plate_size && plate_kb_l_y0 + kb_total_h <= plate_size, "印刷プレートに収まらない");
+assert(kb_split_x - rest_x_out <= plate_size - 2 * plate_margin, "土台 左がプレート幅に収まらない");
+assert(max(kb_base_y1 - kb_base_y0, rest_y1 - frame_y0) + dt_depth <= pocket_w - 8, "立てるパーツが枠のポケットに収まらない");
+
+// lazy-union でパーツごとに別オブジェクトとして出力するため、トップレベルに並べる
+if (part == 7) {
+  translate([plate_margin, plate_margin, 0]) lay_frame();
+  translate([plate_size/2 - (kb_split_x - rest_x_out)/2, plate_kb_l_y0, 0]) lay_base_left();
+  translate([plate_size/2 - (kb_base_y1 - kb_base_y0 + dt_depth)/2, plate_pocket_y0 + plate_in_gap, 0]) lay_base_right();
+  translate([plate_size/2 - (rest_y1 - frame_y0)/2, plate_pocket_y0 + 2 * plate_in_gap + kb_total_h, 0]) lay_wrist_rest(-1);
+  translate([plate_size/2 - (rest_y1 - frame_y0)/2, plate_pocket_y0 + 3 * plate_in_gap + kb_total_h + rest_h, 0]) lay_wrist_rest(1);
 }
 
 model();

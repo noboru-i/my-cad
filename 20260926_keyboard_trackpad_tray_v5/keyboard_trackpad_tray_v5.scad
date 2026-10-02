@@ -33,12 +33,12 @@ kb_h_rear = 10.9;
 
 /* [背面の電源スイッチ・充電ポート (要実測)] */
 // X はトラックパッド手前から見た左端基準
-tp_port_x = tp_w / 2;     // 充電ポート (Lightning / USB-C) は背面中央。上からケーブルを差し込めるよう全高で切り抜く
+tp_port_x = tp_w / 2;     // 充電ポート (Lightning / USB-C) は背面中央。ケーブルを挿したまま枠を上から被せられるよう下から切り抜く
 tp_port_cut_w = 14;       // ケーブルのプラグ根元が通る幅 (USB-C はプラグが太めなので余裕を持たせる)
 tp_switch_x = tp_w - 11;  // 電源スイッチは手前から見て右奥
 tp_switch_cut_w = 12;     // 指でスイッチを操作できる幅
 tp_switch_cut_z = 2;      // スイッチ用切り欠きの下に残す壁の高さ (ポート切り欠きとの間の奥壁を分離させないため)
-tp_port_floor_h = 1.2;    // ポート切り欠きの下に残す床 (枠をリング状につなげる)。プラグが乗り上げない厚さにする
+tp_port_bridge_t = 2;     // ポート切り欠きの上に残すブリッジの厚さ (枠をリング状につなげる)。切り欠きの高さは奥壁の天面からこの分を引いた値
 // X はキーボード手前から見た左端基準。奥壁をこの範囲だけ載置面まで切り欠く
 kb_port_x = kb_w / 2;     // 充電ポート (Lightning / USB-C) は背面中央
 kb_port_cut_w = 24;
@@ -132,8 +132,9 @@ function kb_top_z(y) = kb_base_h + min(kb_h_rear, kb_h_front + (kb_h_rear - kb_h
 
 rest_lip_t = rest_top_z(rest_y1) - (tp_top_z(rest_y1) + rest_tp_gap); // 覆い部分の厚さ (天面と平行なので一定)
 kb_frame_gap = kb_base_h - tp_top_z(frame_y1); // キーボード底面と枠奥端天面の隙間
+tp_port_cut_h = tp_top_z(tp_d) - frame_top_offset - tp_port_bridge_t; // 枠のポート切り欠きの高さ (床から)
 
-echo(str("トラックパッド外枠: ", frame_w, " x ", frame_d, " mm"));
+echo(str("トラックパッド外枠: ", frame_w, " x ", frame_d, " mm / ポート切り欠き ", tp_port_cut_w, " x 高さ ", tp_port_cut_h, " mm"));
 echo(str("リストレスト (片側): ", rest_side_w + frame_wall + margin + rest_tp_cover, " x ", rest_y1 - frame_y0,
          " x ", rest_top_z(frame_y0), "-", rest_h, " mm / 覆い部分の厚さ ", rest_lip_t, " mm"));
 echo(str("キーボード土台: 左 ", kb_split_x - rest_x_out, " / 右 ", tray_x1 - kb_split_x,
@@ -241,8 +242,8 @@ module trackpad_frame() {
       linear_extrude(tp_h_rear + 1) frame_2d();
       slope_clip(frame_top_offset);
     }
-    translate([tp_port_x - tp_port_cut_w/2, tp_d, tp_port_floor_h])
-      cube([tp_port_cut_w, frame_y1 - tp_d + 1, tp_h_rear + 2]);
+    translate([tp_port_x - tp_port_cut_w/2, tp_d, -1])
+      cube([tp_port_cut_w, frame_y1 - tp_d + 1, tp_port_cut_h + 1]);
     translate([tp_switch_x - tp_switch_cut_w/2, tp_d, tp_switch_cut_z])
       cube([tp_switch_cut_w, frame_y1 - tp_d + 1, tp_h_rear + 2]);
   }

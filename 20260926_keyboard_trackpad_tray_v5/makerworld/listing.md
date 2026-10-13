@@ -87,12 +87,16 @@ The keyboard bases and wrist rests are solid shapes, so most of the weight comes
 
 ## Assembly
 
-All dovetails slide in from above.
+All dovetails slide in from above. Put the tray together first, then set it over the trackpad. A PDF assembly guide is included.
 
-1. Place the trackpad frame (with the trackpad inside)
+1. Place the trackpad frame (without the trackpad)
 2. Slide the left keyboard base down onto the back of the frame
 3. Slide the right keyboard base down. It joins both the left base and the frame
 4. Lower the left and right wrist rests. Each one joins the frame and a keyboard base at the same time
+5. Plug the cable into the trackpad and lower the assembled tray over it. The cable runs back through the channel under the left keyboard base
+6. Place the keyboard
+
+The joints between the keyboard bases and the wrist rests are tight. Remove all support from the dovetails, and be ready to press the wrist rests down firmly.
 
 ## Notes
 
@@ -145,12 +149,16 @@ Magic Keyboard と Magic Trackpad をまとめて置くトレイ。トラック�
 
 ### 組み立て
 
-ダブテールはどれも上から差し込む。
+ダブテールはどれも上から差し込む。先にトレイを組み立ててから、トラックパッドに上から被せる。PDF の組立ガイドを同梱している。
 
-1. トラックパッド外枠を置く（中にトラックパッドを入れる）
+1. トラックパッド外枠を置く（トラックパッドは入れない）
 2. キーボード土台 左を、枠の奥に上から差し込む
 3. キーボード土台 右を上から差し込む。左の土台と枠の両方に同時に入る
 4. 左右のリストレストを上から下ろす。それぞれ枠とキーボード土台に同時に入る
+5. トラックパッドにケーブルを挿し、組み立てたトレイを上から被せる。ケーブルはキーボード土台 左の下の溝を通って背面へ出る
+6. キーボードを置く
+
+キーボード土台とリストレストの接合部はきつい。ダブテールのサポート材をすべて取り除き、リストレストは力を入れて押し込む。
 
 ### 補足
 

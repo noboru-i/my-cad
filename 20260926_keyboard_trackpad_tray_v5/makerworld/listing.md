@@ -164,3 +164,53 @@ Magic Keyboard と Magic Trackpad をまとめて置くトレイ。トラック�
 
 - トラックパッドの電源スイッチはキーボードの下に隠れる。操作するときはキーボードをずらす
 - OpenSCAD と BOSL2 で設計した
+
+## プリントプロファイル
+
+### プロファイル名
+
+```text
+0.2mm layer, 2 walls, 15% infill
+```
+
+### プロファイル説明（英語・投稿用）
+
+```markdown
+All 5 parts on one Bambu Lab A1 mini plate (180 × 180 mm).
+
+- Printer: Bambu Lab A1 mini, 0.4 mm nozzle
+- Process: 0.20mm Standard @BBL A1M (0.2 mm layers, 2 walls, 15% grid infill)
+- Filament: Bambu PLA Basic
+- Plate: Supertack Plate
+- Supports: on, normal (auto), 30° threshold angle. These are the only settings changed from the system profile
+- Brim: auto
+
+Orientation:
+
+- Trackpad frame: flat
+- Keyboard bases and wrist rests: standing on their side (80 to 123 mm tall). The brim keeps them stable
+
+After printing, remove all support from the dovetails. Leftover support makes the joints too tight to assemble.
+
+For a lighter test print, set Sparse infill density to 5% and pattern to Lightning. Keep the wall count so the dovetail fit stays the same.
+```
+
+### プロファイル説明（日本語訳・確認用）
+
+5 パーツすべてを Bambu Lab A1 mini の 1 プレート（180 × 180mm）に並べている。
+
+- プリンター: Bambu Lab A1 mini、0.4mm ノズル
+- プロセス: 0.20mm Standard @BBL A1M（積層 0.2mm、壁 2 層、インフィル 15% グリッド）
+- フィラメント: Bambu PLA Basic
+- プレート: Supertack Plate
+- サポート: あり。normal(auto)、しきい角 30°。システムプロファイルから変えたのはこの設定だけ
+- ブリム: 自動
+
+向き:
+
+- トラックパッド外枠: 平置き
+- キーボード土台とリストレスト: 横に立てる（高さ 80〜123mm）。ブリムで倒れにくくしている
+
+印刷後、ダブテールのサポート材をすべて取り除く。残っているときつくて組み立てられない。
+
+軽い試し刷りにするなら、Sparse infill density を 5%、パターンを Lightning にする。壁の層数は変えない（ダブテールのはめ合いが変わるため）。

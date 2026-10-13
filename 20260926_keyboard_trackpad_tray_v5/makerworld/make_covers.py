@@ -1,11 +1,11 @@
 # MakerWorld cover images built from the photos in images/.
 # Requires Pillow and the macOS system font Avenir Next.
-#   python3 images/makerworld/make_covers.py
+#   python3 makerworld/make_covers.py
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-OUT = Path(__file__).resolve().parent  # images/makerworld/
-SRC = OUT.parent  # images/
+OUT = Path(__file__).resolve().parent  # makerworld/
+SRC = OUT.parent / "images"
 
 AVENIR = "/System/Library/Fonts/Avenir Next.ttc"
 F_BOLD, F_DEMI, F_MED, F_REG, F_HEAVY = 0, 2, 5, 7, 8
@@ -18,7 +18,7 @@ GREY = (170, 170, 175)
 
 KICKER = "FOR APPLE MAGIC KEYBOARD & MAGIC TRACKPAD"
 TITLE = ["Keyboard + Trackpad", "Tray"]
-CHIPS = ["5 parts", "Fits A1 mini (180 mm)", "No supports", "No glue needed"]
+CHIPS = ["5 parts", "Fits A1 mini (180 mm)", "No glue or screws needed"]
 
 
 def font(size, idx=F_BOLD):
@@ -174,7 +174,7 @@ def cover_3x4():
         title_size -= 1
     h_img = fit_w(hero, inner_w)
     s_img = fit_w(side_crop, inner_w)
-    chip_size, chip_gap, lab = 40, 28, 32
+    chip_size, chip_gap, lab = 46, 30, 32
     chip_h = round(chip_size * 1.25) + round(chip_size * 0.45) * 2
     text_h = round(34 * 1.7) + round(title_size * 1.12)
     side_h = round(lab * 1.5) + s_img.height
